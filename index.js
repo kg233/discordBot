@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const { prefix } = require('./prefix.json');
+//const { prefix } = require('./prefix.json');
 //const { token } = require('./token.json');
-
+const prefix = '~'
 const client = new Discord.Client();
 
 client.once('ready', () => {
