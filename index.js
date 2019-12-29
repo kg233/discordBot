@@ -23,6 +23,8 @@ client.on('message', message => {
       message.channel.send(help);
     } else if (message.content === prefix + 'git') {
       message.channel.send('https://github.com/kg233/discordBot');
+    } else if (message.content === prefix + 'kg') {
+      message.channel.send('KnmbG');
     }
   }
 });
