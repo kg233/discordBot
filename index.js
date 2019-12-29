@@ -4,6 +4,8 @@ const { prefix } = require('./prefix.json');
 const token = process.env.token;
 const client = new Discord.Client();
 
+console.log(token);
+
 client.once('ready', () => {
   console.log('Ready!');
 });
