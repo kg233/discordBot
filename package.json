@@ -5,10 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-<<<<<<< HEAD
-    "deploy": "gcloud app deploy",
-=======
->>>>>>> 403a7ee95e0957ab34af8b518fac1e0f73f06d62
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
