@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { prefix } = require('./prefix.json');
-// const { token } = require('./token.json');
+const imagePick = require('./src/imgPick');
+
 const token = process.env.token;
 const client = new Discord.Client();
 
@@ -25,6 +26,10 @@ client.on('message', message => {
       message.channel.send('https://github.com/kg233/discordBot');
     } else if (message.content === prefix + 'kg') {
       message.channel.send('KnmbG');
+    } else if (message.content === prefix + 'hentai') {
+      channel.send({
+        files: [imagePick()],
+      });
     }
   }
 });
