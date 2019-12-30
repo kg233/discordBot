@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { prefix } = require('./prefix.json');
 const imagePick = require('./src/imgPick');
-
+require('dotenv').config();
 const token = process.env.token;
 const client = new Discord.Client();
 const mongoose = require('mongoose');
@@ -46,7 +46,7 @@ mongoose
     `mongodb+srv://bot:ULoWN5hxBuDutFjf@cluster0-ihxwd.azure.mongodb.net/discordBot?retryWrites=true&w=majority`
   )
   .then(() => {
-    client.login('NjYwNzYzMTYwODEwMDk0NTky.Xglavw.M3wiA5t4zAH8tQQ_f4N-2zfto1E');
+    client.login(token);
   })
   .catch(err => {
     console.log(err);
