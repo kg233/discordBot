@@ -27,7 +27,7 @@ client.on('message', message => {
     } else if (message.content === prefix + 'kg') {
       message.channel.send('KnmbG');
     } else if (message.content === prefix + 'hentai') {
-      channel.send({
+      message.channel.send({
         files: [imagePick()],
       });
     }
