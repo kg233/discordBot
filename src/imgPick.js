@@ -3,5 +3,5 @@ const source = [
 ];
 
 module.exports = function imagePick() {
-  return source[0];
+  return source[Math.floor(Math.random() * source.length)];
 };
