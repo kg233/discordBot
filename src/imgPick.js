@@ -16,5 +16,4 @@ module.exports = function imagePick() {
       throw err;
     });
 
-  // return source[Math.floor(Math.random() * source.length)];
 };
