@@ -4,8 +4,7 @@ const imagePick = require('./src/imgPick');
 
 const token = process.env.token;
 const client = new Discord.Client();
-
-console.log(token);
+const mongoose = require('mongoose');
 
 client.once('ready', () => {
   console.log('Ready!');
@@ -27,11 +26,28 @@ client.on('message', message => {
     } else if (message.content === prefix + 'kg') {
       message.channel.send('KnmbG');
     } else if (message.content === prefix + 'hentai') {
-      message.channel.send({
-        files: [imagePick()],
-      });
+      imagePick()
+        .then(url => {
+          message.channel.send({
+            files: [url],
+          });
+          console.log('this is url', url);
+        })
+        .catch(err => {
+          console.log(err);
+          throw err;
+        });
     }
   }
 });
 
-client.login(token);
+mongoose
+  .connect(
+    `mongodb+srv://bot:ULoWN5hxBuDutFjf@cluster0-ihxwd.azure.mongodb.net/discordBot?retryWrites=true&w=majority`
+  )
+  .then(() => {
+    client.login('NjYwNzYzMTYwODEwMDk0NTky.Xglavw.M3wiA5t4zAH8tQQ_f4N-2zfto1E');
+  })
+  .catch(err => {
+    console.log(err);
+  });
