@@ -57,10 +57,6 @@ client.on('messageReactionAdd', (msgrcn, user) => {
     .fetchUsers()
     .then(obj => {
       if (ME != obj.firstKey(1)[0]) {
-        //making sure it not the bot
-        // msgrcn.message.edit(`you chose ${choiceMap[msgrcn.emoji.name]}`, {
-        //   code: true,
-        // });
         let msgid = msgrcn.message.id;
         if (msgid in lookup) {
           msgrcn.remove(user);
