@@ -30,7 +30,7 @@ class Todos {
   }
 
   handle(emojiUNI) {
-    this.message.edit(`${emojiUNI}`, { code: true });
+    this.message.edit(`${this.makeHeader()}${emojiUNI}`, { code: true });
   }
 }
 
