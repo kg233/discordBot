@@ -11,7 +11,9 @@ async function getImageUrl() {
 
 async function queryTodos(author_id) {
   let v = await User.findOne({ user_id: author_id });
-
+  if (v == null) {
+    return null;
+  }
   return v.todos;
 }
 

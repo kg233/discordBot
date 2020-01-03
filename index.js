@@ -87,8 +87,15 @@ client.on('message', message => {
         .then(msg => {
           getTodos(message.author.id, msg)
             .then(todo => {
-              lookup[msg.id] = todo;
-              lookup[msg.id].start();
+              if (todo === null) {
+                msg.edit(
+                  'you have no todos, make a new todo by using addTodo',
+                  { code: true }
+                );
+              } else {
+                lookup[msg.id] = todo;
+                lookup[msg.id].start();
+              }
             })
             .catch(err => {
               console.log(err);
@@ -108,7 +115,14 @@ client.on('message', message => {
           .splice(1)
           .join(' ');
 
-        addTodos(message.author.id, description);
+        addTodos(message.author.id, description)
+          .then(_ => {
+            message.channel.send(`added todo: ${description}`, { code: true });
+          })
+          .catch(err => {
+            console.log(err);
+            throw err;
+          });
       }
     }
   }
