@@ -19,6 +19,23 @@ class Todos {
     }
   }
 
+  start() {
+    this.message
+      .react('⬆️')
+      .then(rct => {
+        rct.message.react('⬇️').then(rct => {
+          rct.message.react('⬅️').then(rct => {
+            rct.message.react('➡️');
+          });
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        throw err;
+      });
+    this.render();
+  }
+
   makeHeader() {
     if (this.left === 0) {
       return 'todo list\n------------TOP-------------\n';

@@ -1,8 +1,12 @@
 const Discord = require('discord.js');
 const { prefix } = require('./prefix.json');
-const imagePick = require('./src/imgPick');
+
 const dialog = require('./components/dialog');
-const Todos = require('./components/todo');
+
+const imagePick = require('./src/imgPick');
+const getTodos = require('./src/getTodos');
+
+const { addTodos } = require('./queries/queries');
 
 require('dotenv').config();
 
@@ -22,23 +26,6 @@ const choiceMap = {
 };
 
 //todo work in progress
-const testTodos = [
-  { id: 1, description: 'do dishes', finished: false },
-  { id: 1, description: "fuck vb's ass", finished: false },
-  { id: 1, description: "fuck vb's ass again", finished: false },
-  { id: 1, description: "fuck vb's ass again2", finished: false },
-  { id: 1, description: "fuck vb's ass again3", finished: false },
-  { id: 1, description: "fuck vb's ass 4", finished: false },
-  { id: 1, description: "fuck vb's ass 5", finished: false },
-  { id: 1, description: "fuck vb's ass 6", finished: false },
-  { id: 1, description: "fuck vb's ass 7", finished: false },
-  { id: 1, description: "fuck vb's ass 8", finished: false },
-  { id: 1, description: "fuck vb's ass 9", finished: false },
-  { id: 1, description: "fuck vb's ass 10", finished: false },
-  { id: 1, description: 'do homework', finished: false },
-  { id: 1, description: 'play neko para', finished: false },
-  { id: 1, description: 'hit airplane', finished: false },
-];
 
 const lookup = {}; //change this variable's name
 
@@ -87,7 +74,6 @@ client.on('message', message => {
           message.channel.send({
             files: [url],
           });
-          console.log('this is url', url);
         })
         .catch(err => {
           console.log(err);
@@ -95,34 +81,35 @@ client.on('message', message => {
         });
     } else if (message.content === prefix + 'dialog') {
       dialog(message);
-    } else if (message.content === prefix + 'todo') {
-      let id = message.author.id;
-      //fetch the todo list from mongoDB
+    } else if (message.content === prefix + 'showTodo') {
       message.channel
         .send('loading', { code: true })
         .then(msg => {
-          msg
-            .react('⬆️')
-            .then(rct => {
-              rct.message.react('⬇️').then(rct => {
-                rct.message.react('⬅️').then(rct => {
-                  rct.message.react('➡️');
-                });
-              });
+          getTodos(message.author.id, msg)
+            .then(todo => {
+              lookup[msg.id] = todo;
+              lookup[msg.id].start();
             })
             .catch(err => {
               console.log(err);
               throw err;
             });
-
-          let temp = new Todos(msg, testTodos);
-          lookup[msg.id] = temp;
-          temp.render();
         })
         .catch(err => {
           console.log(err);
           throw err;
         });
+    } else if (message.content.split(' ')[0] === prefix + 'addTodo') {
+      if (message.content.split(' ').length < 2) {
+        message.channel.send('please enter a valid message');
+      } else {
+        let description = message.content
+          .split(' ')
+          .splice(1)
+          .join(' ');
+
+        addTodos(message.author.id, description);
+      }
     }
   }
 });
