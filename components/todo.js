@@ -3,11 +3,13 @@
 //todos is fetched from the database, an array of todo objects..?
 //message is the message that is made by the bot after todo function has been called by the user
 //used to editing the message, handling reaction inputs.
+const { toggleComplete } = require('../queries/queries');
 
 class Todos {
-  constructor(message, todos) {
+  constructor(message, pkg) {
+    this._id = pkg._id;
     this.message = message;
-    this.todos = todos;
+    this.todos = pkg.todos;
     this.cursor = 0;
     this.pageSize = 6;
     this.left = 0;
@@ -17,15 +19,21 @@ class Todos {
     } else {
       this.right = this.todos.length - 1;
     }
+    this.todos.sort((a, b) => {
+      return a.completed - b.completed;
+    });
   }
 
   start() {
+    console.log('_id:', this._id);
     this.message
       .react('⬆️')
       .then(rct => {
         rct.message.react('⬇️').then(rct => {
           rct.message.react('⬅️').then(rct => {
-            rct.message.react('➡️');
+            rct.message.react('➡️').then(rct => {
+              rct.message.react('⭕');
+            });
           });
         });
       })
@@ -47,12 +55,15 @@ class Todos {
     let str = '';
     for (let i = this.left; i <= this.right; i++) {
       //apparently discord disables markdowns in code blocks lol
+      str += '\n';
 
       if (i == this.cursor) {
-        str += `\n--> ${this.todos[i].description}`;
-      } else {
-        str += `\n${this.todos[i].description}`;
+        str += `--> `;
       }
+
+      str += `${this.todos[i].description}`;
+
+      str += this.todos[i].completed ? '  ☑️' : '  ❌';
     }
 
     if (this.right === this.todos.length - 1) {
@@ -109,9 +120,15 @@ class Todos {
         this.left += offset;
         this.render();
       }
+    } else if (emojiUNI === '⭕') {
+      let todo = this.todos[this.cursor];
+      toggleComplete(this._id, todo._id, todo.completed);
+      this.todos[this.cursor].completed = !todo.completed;
+      this.todos.sort((a, b) => {
+        return a.completed - b.completed;
+      });
+      this.render();
     }
-
-    //this.message.edit(`${this.makeHeader()}${emojiUNI}`, { code: true });
   }
 }
 
