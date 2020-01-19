@@ -14,7 +14,7 @@ async function queryTodos(author_id) {
   if (v == null) {
     return null;
   }
-  return v.todos;
+  return { _id: v._id, todos: v.todos };
 }
 
 //mutation
@@ -38,4 +38,15 @@ async function addTodos(author_id, description) {
   }
 }
 
-module.exports = { getImageUrl, queryTodos, addTodos };
+//sets the todo to !isComplete
+async function toggleComplete(userId, todoId, isComplete) {
+  User.updateOne(
+    { _id: userId, 'todos._id': todoId },
+    { $set: { 'todos.$.completed': !isComplete } },
+    (err, raw) => {
+      console.log(raw);
+    }
+  );
+}
+
+module.exports = { getImageUrl, queryTodos, addTodos, toggleComplete };

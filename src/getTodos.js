@@ -5,12 +5,11 @@ const { queryTodos } = require('../queries/queries');
 function getTodos(author_id, message) {
   //get request to database on author_id
   return queryTodos(author_id)
-    .then(todos => {
-      if (todos === null) {
+    .then(pkg => {
+      if (!pkg || !pkg.todos) {
         return null;
       }
-      let temp = new Todos(message, todos);
-      return temp;
+      return new Todos(message, pkg);
     })
     .catch(err => {
       console.log(err);
