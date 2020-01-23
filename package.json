@@ -12,7 +12,18 @@
   "dependencies": {
     "discord.js": "^11.5.1",
     "dotenv": "^8.2.0",
+    "ffmpeg": "0.0.4",
+    "ffmpeg-binaries": "^4.0.0",
     "graphql": "^14.5.8",
-    "mongoose": "^5.8.3"
+    "mongoose": "^5.8.3",
+    "opusscript": "0.0.7",
+    "prettier": "^1.19.1",
+    "ytdl-core": "^1.0.7"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "parser": "flow"
   }
 }
