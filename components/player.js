@@ -1,5 +1,3 @@
-const ytdl = require('ytdl-core')
-
 class Player {
   constructor(message, connection) {
     this.message = message
@@ -15,11 +13,26 @@ class Player {
         rct.message.react('⏹️')
       })
     })
-    this.dispatch = this.connection.playStream(
-      ytdl('https://www.youtube.com/watch?v=V8RwHXUtCcw', {
-        filter: 'audioonly',
-      })
-    )
+
+    let filePath = __dirname + '/../audio/' + 'sabi3.mp3'
+    let correctPath = ''
+
+    for (let char = 0; char < filePath.length; char++) {
+      if (filePath[char] === '\\') {
+        correctPath += '/'
+      } else {
+        correctPath += filePath[char]
+      }
+    }
+
+    console.log(correctPath)
+    this.dispatch = this.connection.playFile(correctPath)
+
+    this.dispatch.on('end', () => {
+      this.end = true
+      this.message.edit('stopped', { code: true })
+      this.connection.disconnect()
+    })
   }
 
   handle(emojiUNI) {

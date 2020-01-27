@@ -126,7 +126,7 @@ client.on('message', message => {
             throw err
           })
       }
-    } else if (message.content === prefix + 'jo') {
+    } else if (message.content === prefix + 'sb') {
       if (!message.member.voiceChannel) {
         message.channel.send('you must be in a voice channel first!')
         return
