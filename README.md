@@ -1,2 +1,0 @@
-# discordBot  
-personal project
