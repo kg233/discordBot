@@ -4,7 +4,8 @@ const logger = require('log4js').getLogger('reactor')
 logger.level = 'debug'
 
 class Reactor {
-  constructor() {
+  constructor(context) {
+    this.context = context
     //<reaction, callback> pairs
     this.map = new Map()
     this.message = null
@@ -41,13 +42,18 @@ class Reactor {
   }
 
   initializeCollector() {
-    const collector = this.message.createReactionCollector(() => true, {
-      time: this.timeoutMs,
-    }) //no filter currently
+    const collector = this.message.createReactionCollector(
+      (reaction, user) => user.id === this.context.triggerMsg.author.id,
+      {
+        time: this.timeoutMs,
+      }
+    ) //no filter currently
     collector.on('collect', (r) => {
-      logger.debug(`Collected ${r.emoji.name}`)
+      logger.debug(`Collected ${JSON.stringify(r)}`)
+
       if (this.map.has(r.emoji.name)) {
-        this.map.get(r.emoji.name)
+        this.map.get(r.emoji.name)()
+        r.users.remove(this.context.triggerMsg.author.id)
       }
     })
     collector.on('end', () => logger.debug('collector stopped'))

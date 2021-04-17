@@ -4,16 +4,9 @@ const logger = require('log4js').getLogger('display')
 logger.level = 'debug'
 
 class Display {
-  constructor(initialText) {
+  constructor(context) {
+    this.context = context
     logger.info('display class constructed!')
-    if (initialText === undefined) {
-      logger.error('did not provide a initial string')
-      return
-    }
-    this.selectedRow = -1
-    this.text = initialText
-    this.groups = this.breakText(initialText)
-    logger.debug(`constructed groups values ${this.groups}`)
   }
 
   breakText(text) {
@@ -21,7 +14,6 @@ class Display {
   }
 
   setText(newText) {
-    if (!newText) return
     this.text = newText
     this.groups = this.breakText(newText)
     this.selectedRow = -1
@@ -40,7 +32,9 @@ class Display {
 
   generateAsText() {
     let output = this.groups
-    output[this.selectedRow] = '**' + output[this.selectedRow] + '**'
+    if (this.selectedRow !== -1) {
+      output[this.selectedRow] = '**' + output[this.selectedRow] + '**'
+    }
 
     return output.join('\n')
   }

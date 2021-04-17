@@ -1,0 +1,8 @@
+two types of invokes: stateless and stateful
+
+stateless invokes always return the same thing when triggered
+
+stateful keeps track of the current state of the invocation. When user invokes the same command to proceed, stateful invokes will check and do appropriate updates.
+
+stateful invokes can be saved, either saving info or something (TBD)
+  need to be able to continue with/without creating a new invoke object

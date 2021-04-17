@@ -4,38 +4,42 @@
 const logger = require('log4js').getLogger('menu')
 logger.level = 'debug'
 
-const Display = require('./display')
+const Display = require('./Display')
 const Reactor = require('./Reactor')
 
 class Menu {
   constructor(context) {
-    //context need to have: client, display message, a map of reaction and its callbacks
+    //context need to have: client, requester, channel
     this.context = context
-    this.display = new Display(context.displayMessage)
-    this.reactor = new Reactor()
-    this.reactor.setReaction(context.reactions)
+    this.display = new Display(context)
+    this.reactor = new Reactor(context)
   }
 
-  async flush(channelId) {
+  async flush(asCode) {
     //send display to channel
     const msg = await this.sendToChannel(
-      channelId,
-      this.display.generateAsText()
+      this.context.triggerMsg.channel.id,
+      this.display.generateAsText(),
+      false
     )
     this.reactor.bindToMessage(msg)
     this.reactor.publish()
   }
 
-  async sendToChannel(channelId, message) {
-    if (!this.context.client) {
-      logger.warn('context does not contain client information')
-      return
-    }
+  async sendToChannel(channelId, message, asCode = false) {
     const msg = await this.context.client.channels.cache
       .get(channelId)
       .send(message)
     logger.debug('flush sent message with id: ' + msg.id)
     return msg
+  }
+
+  setDisplayText(newText) {
+    this.display.setText(newText)
+  }
+
+  setReaction(object) {
+    this.reactor.setReaction(object)
   }
 }
 
