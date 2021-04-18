@@ -8,7 +8,16 @@ logger.level = 'debug'
 class Loading extends Menu {
   constructor(context) {
     super(context)
-    this.animationFrames = ['8D', '8=D', '8==D']
+    this.animationFrames = [
+      '8D',
+      '8=D',
+      '8==D',
+      '8===D',
+      '8====D',
+      '8=====D',
+      '8======D',
+      '8=======D',
+    ]
     this.frameCounter = 0
     this.running = false
     this.refreshFrame()
