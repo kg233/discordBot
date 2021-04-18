@@ -21,8 +21,12 @@ class Menu {
       this.display.generateAsText(),
       asCode
     )
-    this.reactor.bindToMessage(msg)
-    this.reactor.publish()
+
+    if (this.reactor.map.size !== 0) {
+      this.reactor.bindToMessage(msg)
+      this.reactor.publish()
+    }
+
     return msg
   }
 
@@ -34,12 +38,12 @@ class Menu {
     return msg
   }
 
-  continue() {
-    this.flush()
+  async continue() {
+    await this.flush()
   }
 
-  save() {
-    this.reactor.collector.stop()
+  async save() {
+    this.reactor.collector && this.reactor.collector.stop()
   }
 
   setDisplayText(newText) {

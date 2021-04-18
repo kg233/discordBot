@@ -17,6 +17,8 @@ class Loading extends Menu {
       '8=====D',
       '8======D',
       '8=======D',
+      '8=======D~',
+      '8=======D~~',
     ]
     this.frameCounter = 0
     this.running = false
@@ -34,8 +36,10 @@ class Loading extends Menu {
       }
 
       this.refreshFrame()
-
-      this.flush()
+      if (this.running) {
+        //we check again to make sure we are still running
+        this.flush()
+      }
     }
   }
 
@@ -68,11 +72,18 @@ class Loading extends Menu {
     this.animate()
   }
 
-  stop() {
+  async stop() {
     this.running = false
+    const release = await mutex.acquire()
+    try {
+      this.msg.delete()
+    } finally {
+      release()
+    }
   }
 
   save() {
+    logger.debug('saving Loader')
     super.save()
     this.stop()
   }

@@ -3,6 +3,7 @@ const fs = require('fs')
 const Reader = require('./Reader/Reader')
 let { invokes } = require('./index')
 const Loading = require('./Loading/Loading')
+const Jb = require('./jb/Jb')
 
 const logger = require('log4js').getLogger('switch')
 logger.level = 'debug'
@@ -40,7 +41,6 @@ function switchCommands(context) {
   if (match(command, 'ping')) {
     //stateless invoke
     if (!runSavedInvokeOrSave(context)) {
-      logger.debug('creating new invoke')
       const invoke = new Reader(
         context,
         fs.readFileSync('./Reader/default.txt', 'utf-8')
@@ -52,8 +52,14 @@ function switchCommands(context) {
   if (match(command, 'load')) {
     //stateful invoke
     if (!runSavedInvokeOrSave(context)) {
-      logger.debug('creating new invoke')
       const invoke = new Loading(context)
+      invokes.set(requester, invoke)
+    }
+    return
+  }
+  if (match(command, 'jb')) {
+    if (!runSavedInvokeOrSave(context)) {
+      const invoke = new Jb(context)
       invokes.set(requester, invoke)
     }
     return

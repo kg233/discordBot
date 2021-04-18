@@ -8,8 +8,9 @@ logger.level = 'debug'
 class Reader extends Menu {
   static TRIGGER = 'ping'
 
-  constructor(context, displayMessage) {
+  constructor(context, displayMessage, asCode = true) {
     super(context)
+    this.asCode = asCode
     this.setDisplayText(displayMessage)
     // this.setReaction({
     //   '⏫': this.top,
@@ -21,7 +22,7 @@ class Reader extends Menu {
   }
 
   flush() {
-    super.flush(true)
+    super.flush(this.asCode)
   }
 
   continue() {
