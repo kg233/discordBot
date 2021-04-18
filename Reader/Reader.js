@@ -6,15 +6,17 @@ const logger = require('log4js').getLogger('reader')
 logger.level = 'debug'
 
 class Reader extends Menu {
+  static TRIGGER = 'ping'
+
   constructor(context, displayMessage) {
     super(context)
     this.setDisplayText(displayMessage)
-    this.setReaction({
-      '⏫': this.top,
-      '🔼': this.prev,
-      '🔽': this.next,
-      '⏬': this.bottom,
-    })
+    // this.setReaction({
+    //   '⏫': this.top,
+    //   '🔼': this.prev,
+    //   '🔽': this.next,
+    //   '⏬': this.bottom,
+    // })
     this.flush()
   }
 
