@@ -4,6 +4,7 @@ const Reader = require('./Reader/Reader')
 let { invokes } = require('./index')
 const Loading = require('./Loading/Loading')
 const Jb = require('./jb/Jb')
+const ReminderCommand = require('./Reminder/ReminderCommand')
 
 const logger = require('log4js').getLogger('switch')
 logger.level = 'debug'
@@ -60,6 +61,13 @@ function switchCommands(context) {
   if (match(command, 'jb')) {
     if (!runSavedInvokeOrSave(context)) {
       const invoke = new Jb(context)
+      invokes.set(requester, invoke)
+    }
+    return
+  }
+  if (match(command, 'remind')) {
+    if (!runSavedInvokeOrSave(context)) {
+      const invoke = new ReminderCommand(context)
       invokes.set(requester, invoke)
     }
     return

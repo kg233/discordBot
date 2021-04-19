@@ -14,12 +14,13 @@ class Menu {
     this.reactor = new Reactor(context)
   }
 
-  async flush(asCode) {
+  async flush(asCode, embed) {
     //send display to channel
     const msg = await this.sendToChannel(
       this.context.triggerMsg.channel.id,
       this.display.generateAsText(),
-      asCode
+      asCode,
+      embed
     )
 
     if (this.reactor.map.size !== 0) {
@@ -30,10 +31,10 @@ class Menu {
     return msg
   }
 
-  async sendToChannel(channelId, message, asCode = false) {
+  async sendToChannel(channelId, message, asCode = false, embed) {
     const msg = await this.context.client.channels.cache
       .get(channelId)
-      .send(message, { code: asCode })
+      .send(message, { code: asCode, embed })
     logger.debug('flush sent message with id: ' + msg.id)
     return msg
   }
