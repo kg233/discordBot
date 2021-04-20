@@ -14,12 +14,14 @@ function msToHMS(ms) {
 }
 
 function isGoodDate(dt) {
-  var reGoodDate = /^((0?[1-9]|1[012])[- /.](0?[1-9]|[12][0-9]|3[01])[- /.](19|20)?[0-9]{2})*$/
+  //MM/DD/YY with optional r at the end
+  var reGoodDate = /^((0?[1-9]|1[012])[- /.](0?[1-9]|[12][0-9]|3[01])[- /.](19|20)?[0-9]{2})*r?$/
   return reGoodDate.test(dt)
 }
 
 function isGoodTime(dt) {
-  var reGoodTime = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
+  //HH:MM with opitonal r at the end
+  var reGoodTime = /^([01]?[0-9]|2[0-3]):[0-5][0-9]r?$/
   return reGoodTime.test(dt)
 }
 

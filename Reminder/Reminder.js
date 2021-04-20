@@ -77,7 +77,7 @@ class Reminder {
       for (let dateMs of Object.keys(snapshot[userId])) {
         if (dateMs >= nowMs && Math.abs(dateMs - nowMs) < remindRange) {
           const context = snapshot[userId][dateMs]
-          await this.client.channels.cache.get(context.channel).send(
+          this.client.channels.cache.get(context.channel).send(
             `<@${userId}> `,
             new MessageEmbed({
               description: `${context.message}`,
@@ -85,6 +85,35 @@ class Reminder {
               title: `In ${msToHMS(Math.abs(dateMs - nowMs))}`,
             })
           )
+          if (context.repeatDay) {
+            logger.info(
+              `repeating daily event date: ${dateMs} for user ${userId}`
+            )
+            const date = new Date(parseInt(dateMs))
+            date.setDate(date.getDate() + 1)
+            this.addReminder(
+              userId,
+              context.message,
+              date.getTime(),
+              context.channel,
+              false,
+              context.repeatDay
+            )
+          } else if (context.repeatMonth) {
+            logger.info(
+              `repeating monthly event date: ${dateMs} for user ${userId}`
+            )
+            const date = new Date(parseInt(dateMs))
+            date.setMonth(date.getMonth() + 1)
+            this.addReminder(
+              userId,
+              context.message,
+              date.getTime(),
+              context.channel,
+              context.repeatMonth,
+              false
+            )
+          }
         } else if (dateMs < nowMs) {
           //delete this from database
           logger.debug('removing event ' + `/${userId}/${dateMs}`)
@@ -105,7 +134,14 @@ class Reminder {
     setInterval(this.run, gapMs)
   }
 
-  addReminder = async (userId, message, time, channel) => {
+  addReminder = async (
+    userId,
+    message,
+    time,
+    channel,
+    repeatMonth,
+    repeatDay
+  ) => {
     if (!userId || !message || !time || !channel) {
       logger.warn('parameters not satisfied')
       return
@@ -116,19 +152,11 @@ class Reminder {
       return 0
     }
 
-    // dbRef.once(userId, (ss) => {
-    //   if (ss.val() === null){
-
-    //   }
-    //   else{
-
-    //   }
-    //   this.refetch = true
-    // })
-
     const reminderData = {
       message,
       channel,
+      repeatMonth,
+      repeatDay,
     }
 
     const updates = {}

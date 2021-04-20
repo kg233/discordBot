@@ -15,7 +15,7 @@ class ReminderCommand extends Menu {
     const params = this.parseTrigger(this.context.triggerMsg)
     if (!params) {
       this.setDisplayText(
-        `syntax #1: ${PREFIX}remind MM-DD-YY HH:MM message          //HH:MM is optional\nsyntax #2: ${PREFIX}remind in # message`
+        `syntax #1: ${PREFIX}remind MM-DD-YY[r] [HH:MM[r]] {message}`
       )
       this.flush()
       return
@@ -25,12 +25,19 @@ class ReminderCommand extends Menu {
       this.context.triggerMsg.author.id,
       params.message,
       params.dateMs,
-      this.context.triggerMsg.channel.id
+      this.context.triggerMsg.channel.id,
+      params.repeatMonth,
+      params.repeatDay
     )
     if (suc) {
       this.setDisplayText('Success')
       this.flush(true, {
-        description: `${params.message} on `,
+        title: params.repeatDay
+          ? 'Repeats daily'
+          : params.repeatMonth
+          ? 'Repeats monthly'
+          : undefined,
+        description: `${params.message}`,
         timestamp: new Date(params.dateMs).toISOString(),
       })
     } else {
@@ -41,34 +48,51 @@ class ReminderCommand extends Menu {
 
   parseTrigger = (msg) => {
     //parse for date in ms, message
-    //syntax #1: "<PREFIX>remind MM/DD/YY {HH:MM} message" {} is optional
+    //syntax #1: ${PREFIX}remind MM-DD-YY[r] [HH:MM[r]] {message}
     //syntax #2: "<PREFIX>remind in # message"
     //how to account for users time zone? default to utc for now, discord doesn't expose the users timezone,
 
+    let date
+    let message
+    let repeatMonth = false
+    let repeatDay = false
     const split = msg.content.split(' ')
+
     if (split[1] === 'in') {
       if (split.length < 4 || Object.is(parseInt(split[2]), NaN)) {
         return null
       }
 
-      const date = new Date()
+      date = new Date()
       date.setHours(date.getHours() + parseInt(split[2]))
-      return { dateMs: date.getTime(), message: split.splice(3).join(' ') }
+      message = split.splice(3).join(' ')
     } else {
       if (split.length < 3 || !isGoodDate(split[1])) {
         return null
       }
-      const date = new Date(split[1])
-      if (isGoodTime(split[2])) {
-        date.setHours(split[2].split(':')[0])
-        date.setMinutes(split[2].split(':')[1])
 
-        return { dateMs: date.getTime(), message: split.splice(3).join(' ') }
+      date = split[1]
+      if (date[date.length - 1] === 'r') {
+        date = date.slice(0, date.length - 1)
+        repeatMonth = true
+      }
+      date = new Date(date)
+      let time = split[2]
+      if (isGoodTime(time)) {
+        if (time[time.length - 1] === 'r') {
+          time = time.slice(0, time.length - 1)
+          repeatMonth = false
+          repeatDay = true
+        }
+        date.setHours(time.split(':')[0])
+        date.setMinutes(time.split(':')[1])
+        message = split.splice(3).join(' ')
       } else {
         date.setHours(12)
-        return { dateMs: date.getTime(), message: split.splice(2).join(' ') }
+        message = split.splice(2).join(' ')
       }
     }
+    return { dateMs: date.getTime(), message, repeatMonth, repeatDay }
   }
 }
 
