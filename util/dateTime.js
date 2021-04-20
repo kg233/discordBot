@@ -8,7 +8,9 @@ function msToHMS(ms) {
   var minutes = parseInt(seconds / 60) // 60 seconds in 1 minute
   // 4- Keep only seconds not extracted to minutes:
   seconds = seconds % 60
-  return hours ? hours + ' hours, ' : '' + minutes + ' minutes'
+  return hours
+    ? hours + ' hours, ' + minutes + ' minutes'
+    : '' + minutes + ' minutes'
 }
 
 function isGoodDate(dt) {
