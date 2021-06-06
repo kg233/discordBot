@@ -5,6 +5,7 @@ let { invokes } = require('./index')
 const Loading = require('./Loading/Loading')
 const Jb = require('./jb/Jb')
 const ReminderCommand = require('./Reminder/ReminderCommand')
+const Player = require('./player/Player')
 
 const logger = require('log4js').getLogger('switch')
 logger.level = 'debug'
@@ -68,6 +69,13 @@ function switchCommands(context) {
   if (match(command, 'remind')) {
     if (!runSavedInvokeOrSave(context)) {
       const invoke = new ReminderCommand(context)
+      invokes.set(requester, invoke)
+    }
+    return
+  }
+  if (match(command, 'jz')) {
+    if (!runSavedInvokeOrSave(context)) {
+      const invoke = new Player(context, './player/pinwheel.mp3')
       invokes.set(requester, invoke)
     }
     return

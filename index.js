@@ -25,7 +25,7 @@ function buildContext(triggerMsg) {
 client.on('ready', () => {
   logger.debug(`Logged in as ${client.user.tag}!`)
   //set up reminder tracker
-  Reminder.getInstance().attachClientAndStart(client)
+  // Reminder.getInstance().attachClientAndStart(client)
 })
 
 client.on('message', (msg) => {
