@@ -6,6 +6,7 @@ const {
   SHOW_DOWN_ROUND,
   RIVER_BET_ROUND,
   pokerCombinations,
+  ROUND_FINISHED,
 } = require('./defs')
 const { prefix: PREFIX } = require('./../prefix.json')
 
@@ -57,8 +58,12 @@ class RoundPoker extends Menu {
   }
 
   startBetRound() {
+    if (this.players.length === 0) {
+      this.addCommunityCardsForStage()
+      return
+    }
     this.currPlayer = 0
-    this.sendBetRequest(this.players[this.currPlayer])
+    this.sendBetRequest()
   }
 
   handlePlayerAction(playerId, actionMsg) {
@@ -75,9 +80,13 @@ class RoundPoker extends Menu {
 
   handlePlayerCheck(playerId) {
     logger.debug(`player ${this.players[playerId]} has checked`)
-    if (this.currPlayer !== this.players.length - 1) {
+    this.proceedNextBet()
+  }
+
+  proceedNextBet() {
+    if (this.currPlayer >= 0 && this.currPlayer < this.players.length - 1) {
       this.currPlayer += 1
-      this.sendBetRequest(this.currPlayer)
+      this.sendBetRequest()
     } else {
       this.addCommunityCardsForStage()
     }
@@ -119,6 +128,10 @@ class RoundPoker extends Menu {
 
     logger.debug('str_list: ' + str_list)
 
+    if (str_list.length === 0) {
+      this.announceWinner(-1)
+    }
+
     let highest = 0
     let ties = []
     for (let i = 0; i < this.players.length; i++) {
@@ -155,13 +168,18 @@ class RoundPoker extends Menu {
   }
 
   announceWinner(ind) {
-    logger.debug(`${ind} won`)
-    this.alertMsg = `<@${this.players[ind]}> has won the game with \`\`\`${
-      pokerCombinations[this.hands[ind].strength]
-    }: ${this.hands[ind].getCombo()}\`\`\``
-
+    if (ind === -1) {
+      this.alertMsg = 'No one won, game over'
+      return
+    } else {
+      logger.debug(`${ind} won`)
+      this.alertMsg = `<@${this.players[ind]}> has won the game with \`\`\`${
+        pokerCombinations[this.hands[ind].strength]
+      }: ${this.hands[ind].getCombo()}\`\`\``
+    }
     this.communityCards = []
     this.sendMessage()
+    this.stage = ROUND_FINISHED
   }
 
   compareHands(t1, t2) {
@@ -198,7 +216,8 @@ class RoundPoker extends Menu {
     logger.debug('poker stage: ' + this.stage)
   }
 
-  sendBetRequest(playerId) {
+  sendBetRequest() {
+    const playerId = this.players[this.currPlayer]
     this.alertMsg = `<@${playerId}>, check (${PREFIX}check), bet (${PREFIX}bet ###), or fold (${PREFIX}fold)`
     this.refreshTable()
   }
@@ -230,6 +249,20 @@ class RoundPoker extends Menu {
 
   sendPrivMessage(message, playerId) {
     this.discord.users.cache.get(playerId).send(message, { code: true })
+  }
+
+  handlerPlayerFold(playerId) {
+    logger.debug('folding ' + playerId)
+    this.kick(playerId)
+    this.proceedNextBet()
+  }
+
+  kick(playerId) {
+    const ind = this.players.indexOf(playerId)
+    if (ind === -1) return
+    this.players.splice(ind, 1)
+    this.hands.splice(ind, 1)
+    logger.debug('new players list ' + JSON.stringify(this.players))
   }
 }
 

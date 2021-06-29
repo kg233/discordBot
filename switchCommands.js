@@ -96,7 +96,7 @@ function switchCommands(context) {
   }
   if (match(command, 'poker start')) {
     if (pokerGame) {
-      pokerGame.startNewRound()
+      pokerGame.startNewRound(context.triggerMsg.author.id)
     } else {
       console.error('Poker game not found')
     }
