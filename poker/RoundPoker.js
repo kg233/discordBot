@@ -105,7 +105,7 @@ class RoundPoker extends Menu {
   }
 
   handleStage() {
-    if (this.stage !== SHOW_DOWN_ROUND) {
+    if (this.stage < SHOW_DOWN_ROUND) {
       this.startBetRound()
     } else {
       //handle showdown
