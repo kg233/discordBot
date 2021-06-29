@@ -83,42 +83,43 @@ function switchCommands(context) {
     }
     return
   }
-  if (match(command, "poker new join start")) {
+  if (match(command, 'poker new join start')) {
     pokerGame = new PokerGame(context)
     pokerGame.join(context.triggerMsg.author.id)
     pokerGame.startNewRound()
     return
   }
-  if (match(command, "poker new join")) {
+  if (match(command, 'poker new join')) {
     pokerGame = new PokerGame(context)
     pokerGame.join(context.triggerMsg.author.id)
     return
   }
-  if (match(command, "poker start")) {
+  if (match(command, 'poker start')) {
     if (pokerGame) {
       pokerGame.startNewRound()
-    }
-    else {
-      console.error("Poker game not found")
+    } else {
+      console.error('Poker game not found')
     }
     return
   }
-  if (match(command, "poker join")) {
+  if (match(command, 'poker join')) {
     if (pokerGame) {
       pokerGame.join(context.triggerMsg.author.id)
-    }
-    else {
-      console.error("Poker game not found")
+    } else {
+      console.error('Poker game not found')
     }
     return
   }
 
-  if (match(command, "poker new")) {
+  if (match(command, 'poker new')) {
     pokerGame = new PokerGame(context)
     return
   }
-  if (match(command, "check")) {
-    pokerGame.handlePlayerAction(context.triggerMsg.author.id, "check")
+  if (match(command, 'check')) {
+    pokerGame.handlePlayerAction(
+      context.triggerMsg.author.id,
+      context.triggerMsg
+    )
     return
   }
 }

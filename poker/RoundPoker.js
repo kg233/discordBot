@@ -1,6 +1,12 @@
-const Menu = require("../menu/Menu")
-const Cards = require("./card/Cards")
-const { ROUND_START, BLIND_BET_ROUND, SHOW_DOWN_ROUND, RIVER_BET_ROUND, pokerCombinations } = require("./defs")
+const Menu = require('../menu/Menu')
+const Cards = require('./card/Cards')
+const {
+  ROUND_START,
+  BLIND_BET_ROUND,
+  SHOW_DOWN_ROUND,
+  RIVER_BET_ROUND,
+  pokerCombinations,
+} = require('./defs')
 const { prefix: PREFIX } = require('./../prefix.json')
 
 const logger = require('log4js').getLogger('Round')
@@ -13,23 +19,38 @@ class RoundPoker extends Menu {
     this.players = players
     this.currPlayer = 0
     this.hands = new Array(players.length)
-    this.betAmount = Array.from(new Array(this.players.length), _ => 0)
+
+    //betting and community cards
+    this.betAmount = Array.from(new Array(this.players.length), (_) => 0)
     this.prizePool = 0
     this.communityCards = []
     this.stage = ROUND_START
+
+    //dealer shuffle cards
     this.dealer = dealer
     this.dealer.shuffle()
-    this.dealHoleCards()
+
+    //set message stub
+    this.setDisplayText('starting game...')
+    this.flush().then((msgObj) => {
+      this.msgObj = msgObj
+      this.alertMsg = 'Game started'
+
+      this.dealHoleCards()
+    })
   }
 
   dealHoleCards() {
-    for (let i = 0; i < this.players.length; i ++){
+    for (let i = 0; i < this.players.length; i++) {
       const hand = []
       hand.push(this.dealer.deal(true), this.dealer.deal(true))
       this.hands[i] = hand
 
-      this.sendPrivMessage(`your hand: ${new Cards(hand).toString()}`, this.players[i])
-    }   
+      this.sendPrivMessage(
+        `your hand: ${new Cards(hand).toString()}`,
+        this.players[i]
+      )
+    }
 
     this.setState(BLIND_BET_ROUND)
     this.startBetRound()
@@ -40,13 +61,16 @@ class RoundPoker extends Menu {
     this.sendBetRequest(this.players[this.currPlayer])
   }
 
-  handlePlayerAction(playerId, action) {
+  handlePlayerAction(playerId, actionMsg) {
+    const action = actionMsg.content
     if (playerId !== this.players[this.currPlayer]) return
-    if (action === "check") {
+    if (action === PREFIX + 'check') {
       this.handlePlayerCheck(playerId)
     } else {
-      this.sendMessage("还没写完呢臭傻逼, try again", playerId)
+      this.alertMsg = '还没写完呢臭傻逼, try again'
+      this.refreshTable()
     }
+    actionMsg.delete()
   }
 
   handlePlayerCheck(playerId) {
@@ -62,12 +86,11 @@ class RoundPoker extends Menu {
   addCommunityCardsForStage() {
     if (this.stage === BLIND_BET_ROUND) {
       this.addCommCards(3)
-    }
-    else if (this.stage !== RIVER_BET_ROUND) {
+    } else if (this.stage !== RIVER_BET_ROUND) {
       this.addCommCards(1)
     }
 
-    this.displayCommCards()
+    this.refreshTable()
     this.nextStage()
     this.handleStage()
   }
@@ -86,15 +109,15 @@ class RoundPoker extends Menu {
 
     const str_list = []
 
-    for (let i = 0; i < this.players.length; i ++) {
+    for (let i = 0; i < this.players.length; i++) {
       const cards = new Cards(this.hands[i].concat(this.communityCards))
       await cards.evaluate()
-      
+
       this.hands[i] = cards
-      str_list.push(this.hands[i].strength) 
+      str_list.push(this.hands[i].strength)
     }
 
-    logger.debug("str_list: " + str_list)
+    logger.debug('str_list: ' + str_list)
 
     let highest = 0
     let ties = []
@@ -102,13 +125,12 @@ class RoundPoker extends Menu {
       if (str_list[i] > highest) {
         highest = str_list[i]
         ties = [i]
-
       } else if (str_list[i] === highest) {
         ties.push(i)
       }
     }
 
-    logger.debug("tie list: " + ties)
+    logger.debug('tie list: ' + ties)
 
     if (ties.length > 1) {
       this.announceWinner(this.handleTies(ties))
@@ -134,7 +156,12 @@ class RoundPoker extends Menu {
 
   announceWinner(ind) {
     logger.debug(`${ind} won`)
-    this.sendMessage(`Won with ${pokerCombinations[this.hands[ind].strength]}: ${this.hands[ind].getCombo()}`, this.players[ind])
+    this.alertMsg = `<@${this.players[ind]}> has won the game with \`\`\`${
+      pokerCombinations[this.hands[ind].strength]
+    }: ${this.hands[ind].getCombo()}\`\`\``
+
+    this.communityCards = []
+    this.sendMessage()
   }
 
   compareHands(t1, t2) {
@@ -157,13 +184,9 @@ class RoundPoker extends Menu {
   }
 
   addCommCards(t) {
-    for (let i = 0; i < t; i ++) {
-      this.communityCards.push(this.dealer.deal()) 
+    for (let i = 0; i < t; i++) {
+      this.communityCards.push(this.dealer.deal())
     }
-  }
-
-  displayCommCards() {
-    this.sendMessage(this.communityCards.toString(), null, true) 
   }
 
   setState(stage) {
@@ -172,24 +195,42 @@ class RoundPoker extends Menu {
 
   nextStage() {
     this.stage += 1
-    logger.debug("poker stage: " + this.stage)
+    logger.debug('poker stage: ' + this.stage)
   }
 
   sendBetRequest(playerId) {
-    this.sendMessage(`check (${PREFIX}check), bet (${PREFIX}bet ###), or fold (${PREFIX}fold)`, playerId)
+    this.alertMsg = `<@${playerId}>, check (${PREFIX}check), bet (${PREFIX}bet ###), or fold (${PREFIX}fold)`
+    this.refreshTable()
   }
 
-  sendMessage(message, playerId, asCode = false) {
-    this.setDisplayText(playerId? `<@${playerId}>, ` + message : message)
-    this.flush(asCode)
+  refreshTable() {
+    this.sendMessage(false, this.msgObj)
+  }
+
+  sendMessage(asCode = false, msgObj) {
+    //should edit this message so that this.alertMsg and this.communityCards are shown
+    //is msgobj is undefined, send a new message instead of editing
+    const msg =
+      this.alertMsg +
+      '\n' +
+      (this.communityCards.length > 0 ? this.makeTableString() : '')
+    this.setDisplayText(msg)
+    this.flush(asCode, null, msgObj)
+  }
+
+  makeTableString() {
+    return (
+      '```' +
+      '===================\n' +
+      new Cards(this.communityCards).toString() +
+      '\n===================' +
+      '```'
+    )
   }
 
   sendPrivMessage(message, playerId) {
-    this.discord.users.cache.get(playerId).send(message, {code: true})
+    this.discord.users.cache.get(playerId).send(message, { code: true })
   }
-
 }
-
-
 
 module.exports = RoundPoker

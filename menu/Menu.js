@@ -14,8 +14,12 @@ class Menu {
     this.reactor = new Reactor(context)
   }
 
-  async flush(asCode, embed) {
+  async flush(asCode, embed, msgObj) {
     //send display to channel
+    if (msgObj) {
+      msgObj.edit(this.display.generateAsText(), { code: asCode, embed })
+      return msgObj
+    }
     const msg = await this.sendToChannel(
       this.context.triggerMsg.channel.id,
       this.display.generateAsText(),
@@ -27,7 +31,6 @@ class Menu {
       this.reactor.bindToMessage(msg)
       this.reactor.publish()
     }
-
     return msg
   }
 
@@ -35,7 +38,6 @@ class Menu {
     const msg = await this.context.client.channels.cache
       .get(channelId)
       .send(message, { code: asCode, embed })
-    logger.debug('flush sent message with id: ' + msg.id)
     return msg
   }
 
