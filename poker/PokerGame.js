@@ -16,7 +16,7 @@ class PokerGame extends Menu {
     this.discordClient = context.client
     this.setDisplayText('new poker game created')
     this.flush()
-    this.inactiveTracker = new InactiveTracker(30, this.kick)
+    this.inactiveTracker = new InactiveTracker(1, this.kick)
   }
 
   join(id) {

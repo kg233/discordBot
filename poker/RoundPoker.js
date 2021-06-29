@@ -130,6 +130,7 @@ class RoundPoker extends Menu {
 
     if (str_list.length === 0) {
       this.announceWinner(-1)
+      return
     }
 
     let highest = 0
@@ -170,7 +171,6 @@ class RoundPoker extends Menu {
   announceWinner(ind) {
     if (ind === -1) {
       this.alertMsg = 'No one won, game over'
-      return
     } else {
       logger.debug(`${ind} won`)
       this.alertMsg = `<@${this.players[ind]}> has won the game with \`\`\`${
