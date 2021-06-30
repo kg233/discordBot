@@ -252,6 +252,9 @@ class RoundPoker extends Menu {
   }
 
   handlerPlayerFold(playerId) {
+    if (this.stage >= ROUND_FINISHED) {
+      return
+    }
     logger.debug('folding ' + playerId)
     this.kick(playerId)
     this.proceedNextBet()
